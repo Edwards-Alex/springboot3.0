@@ -1,0 +1,27 @@
+server:
+  port: 9999
+
+person:
+  name: 张三
+  age: 18
+  birthday: 2021/10/23 12:12:12
+  like: true
+  child:
+    name: 小吴
+    age: 12
+    birthday: 2022/12/12 12:12:12
+    text: ["abc","def"]
+  dogs:
+    - name: 小黑
+      age: 12
+    - name: 小白
+      age: 12
+  cats:
+    c1:
+      name: 小黄
+      age: 1
+    c2:
+      # 对象也可以大括号表示
+      {name: 小红,age: 3}
+
+
