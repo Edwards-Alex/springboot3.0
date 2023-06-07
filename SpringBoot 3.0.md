@@ -58,17 +58,17 @@
 
  1. 导入`starter-web`场景启动器：导入了web开发场景
 
-    	1. 场景启动器导入了相关场景的所有依赖：`starter-json`、`start-tomcat`、`springmvc`
-    	2. 每个场景启动器都引入了一个 `spring-boot-starter`，核心场景启动器。
-    	3. **核心场景启动器**引入了`spring-boot-configure`包。
-    	4. `spring-boot-autpconfigure`囊括了所有场景的所有配置
-    	5. 只要这个包下所有类都能生效，那么相当于SpringBoot写好的整合功能就生效了。
-    	6. SpringBoot 默认扫描不到`spring-boot-configure`下写好的所有配置类。（这些配置类给我们做了整合操作）
-    	7. 
+     1. 场景启动器导入了相关场景的所有依赖：`starter-json`、`start-tomcat`、`springmvc`
+         	2. 每个场景启动器都引入了一个 `spring-boot-starter`，核心场景启动器。
+         	3. **核心场景启动器**引入了`spring-boot-configure`包。
+         	4. `spring-boot-autpconfigure`囊括了所有场景的所有配置
+         	5. 只要这个包下所有类都能生效，那么相当于SpringBoot写好的整合功能就生效了。
+         	6. SpringBoot 默认扫描不到`spring-boot-configure`下写好的所有配置类。（这些配置类给我们做了整合操作）
+         	7. 
 
  2. 主程序： `@SpringBootApplication`
 
-    1.  `@SpringBootApplication` 由三个注解组成 `@SpringBootConfiguration` `@EnableAutoConfiguration` `@ComponentScan` 
+    1. `@SpringBootApplication` 由三个注解组成 `@SpringBootConfiguration` `@EnableAutoConfiguration` `@ComponentScan` 
 
     2. springboot 默认只能扫描到主程序所在包及其子包，扫描不到`spring-boot-autoconfigure` 包中官方写好的**配置类**
 
@@ -89,12 +89,112 @@
 
     4. XXXAutoConfiguration **自动配置类**
 
-       	1. 给容器中使用@Bean放一堆组件
-       	2. 每个自动配置类都可能有这个注解`@EnableConfigurationProperties(ServerPeoperties.class)`,用来把配置文件配的指定前缀的属性值封装到`XXXProperties`属性类中去
-       	3. 已Tomcat为例，所有服务器的配置以server开头的。配置都封装到了属性类中。
-       	4. 给**容器**中放的所有**组件**的一些**核心参数**，都来自于`XXPeoperties`。`XXPeoperties`都是和**配置文件**绑定的
+       1.  给容器中使用@Bean放一堆组件
+       2.  每个自动配置类都可能有这个注解`@EnableConfigurationProperties(ServerPeoperties.class)`,用来把配置文件配的指定前缀的属性值封装到`XXXProperties`属性类中去
+       3.  已Tomcat为例，所有服务器的配置以server开头的。配置都封装到了属性类中。
+       4.  给**容器**中放的所有**组件**的一些**核心参数**，都来自于`XXPeoperties`。`XXPeoperties`都是和**配置文件**绑定的
+       5.  只要修改配置文件的值，核心文件的底层参数都能修改。
 
  3. 写业务，全程无需关心任何整合（底层这些整合写好了，也生效了）
+
+​	**<font color=red>核心流程</font>**：
+
+  1. 导入`starter`，就去导入`AutoConfiguration`包。
+
+  2. `AutoConfiguration`包里有一个文件`MATA-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.import`,里面指定所有启动要加载的自动配置类
+
+  3. `@EnableAutoConfiguration`会自动把上面文件里面写的所有**自动配置类**导入进来。**XXXAutoConfiguration**是有条件注释按需加载。
+
+  4. `XXXAutoConfiguration`给容器中导入一堆组件，组件都是从`xxxProperties`中提取属性值。
+
+  5. `xxxProperties`又是和**配置文件**进行了绑定
+
+     效果：导入`starter`,修改配置文件，就能修改底层行为。
+
+     
+
+     
+
+     ![image-20230605155306346](C:\Users\10326\AppData\Roaming\Typora\typora-user-images\image-20230605155306346.png)
+
+#### 4. 如何学好springboot
+
+摄影：
+
+- 傻瓜：自动配置好
+- 单反：焦距、光感、快门等...
+- 傻瓜+单反
+
+1. 理解自动配置原理
+   1. 导入starter --> 生效xxxAutoConfiguration --> 组件 -->xxxProperties -->配置文件
+2. 理解**其他框架底层**
+   1. 拦截器
+3. 可以随时定制化任何组件
+   1. 配置文件
+   2. 自定义组件
+
+普通开发: `导入starter`,Contorller,Service,Mapper,偶尔修改配置文件
+
+**高级开发**：自定义组件，自定义配置，自定义starter
+
+核心：
+
+- 这个场景自动配置导入了哪些组件，我们能不能Autowired进来使用
+- 能不能通过修改配置改变组件的一些默认参数
+- 需不需要自己完全定义这个组件
+- **<font color=red>场景定制化</font>**
+
+
+
+<font color=red>最佳实战</font>
+
+选场景，导入到项目
+
+- 官方：starter
+- 第三方：去仓库搜
+
+写配置，改配置文件关键项
+
+- 数据库修改(链接地址、账号密码...)
+
+分析这个场景给我们导入了**哪些能用的组件**
+
+- 自动装配这些组件进行后续使用
+- 不满意boot提供的自动配好的默认组件
+  - 定制化
+    - 改配置
+    - 自定义组件
+
+整合redis：
+
+- 选场景：`spring-boot-starter-data-redis`
+  - 场景AutoConfiguration就是这个场景的自动配置类
+
+- 写配置：
+  - 分析到这个场景的自动配置类开启了哪些属性绑定关系
+  - `@EnableConfigurationProperties(RedisProperties.class)`
+  - 修改redis的相关配置
+
+- 分析组件：
+  - 分析道`RedisAutoConfiguration`给容器中放了`StringRedisTemplate`
+  - 给业务代码中自动装配`StringRedisTemplate`
+
+- 定制化
+  - 修改配置文件
+  - 自定义组件，自己给容器中放一个`StringRedisTemplate`
+
+
+#### 5. yaml基础
+
+ 5. 小技巧lombok
+
+    - 简化javabean开发。自动生成构造器、getter/setter、自动生成Builder模式等
+
+    - ```
+      
+      ```
+
+      
 
 ###  2、核心技能
 
