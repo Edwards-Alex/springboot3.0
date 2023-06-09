@@ -411,3 +411,27 @@ logging.logback.rollingpolicy.max-file-size=10MB
 2. 修改`application.properties` 配置文件，就可以调整日志的所有行为。如果不够，可以编写日志框架自己的配置文件在类路径下。比如`logback-spring.xml`，`log4j2-spring.xmnl`
 3. 如需对接**专业日志系统**，也只要把logback记录的日志灌到hafka之类的中间件，这个SpringBoot没关系，都是日志框架自己的配置，修改配置文件即可。
 4. **业务中使用slf4j-api记录日志，不要在sout了。**
+
+
+
+### 2. SpringBoot3-Web开发
+
+SpringBoot的Web开发能力，由SpringMVC提供。
+
+#### 1. Web场景
+
+##### 1. 自动配置
+
+1. 整合web场景
+
+   - ```xml
+     <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+     </dependency>
+     ```
+
+2. 引入了`AutoConfigure`功能
+
+3. 
+
