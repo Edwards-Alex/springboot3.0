@@ -184,23 +184,12 @@
   - 自定义组件，自己给容器中放一个`StringRedisTemplate`
 
 
-#### 5. yaml基础
-
- 5. 小技巧lombok
-
-    - 简化javabean开发。自动生成构造器、getter/setter、自动生成Builder模式等
-
-    - ```
-      
-      ```
-
-      
 
 ###  2、核心技能
 
-1. 常用注释
+1. #### 常用注释
 
-​		springboot 摒弃传统XML配置方式，改为全注释驱动。
+   springboot 摒弃传统XML配置方式，改为全注释驱动。
 
   1. 组件注册
 
@@ -257,5 +246,168 @@
     
        [如果遇到 配置文件 中文输出乱码 idea setting FileEncoding 设置编码格式为UTF-8 底层编译仍用ASCII码勾选]
 
-​	
+#### 2. YAML配置文件
 
+##### 	1.细节：
+
+- birthDay推荐写为birth-day
+- 文本：
+  - 单引号不会转义【\n为普通字符串显示】
+  - 双引号会转义【\n显示为换行符】
+- 大文本：
+  - `|`开头，大文本写在下层，保留文本格式，换行符正确显示
+  - `>`开头，大文本写在下层，折叠换行符
+- 多文档合并：
+  - 使用`---`可以把多个yaml文档合并在一个文档中，每个文档依然认为内容独立
+
+
+
+##### 2. 小技巧：lombok
+
+| 简化JavaBean开发。自动生成构造器、getter/setter方法、自动生成Builder方法等
+
+```xml
+ <dependency>
+     <groupId>org.projectlombok</groupId>
+     <artifactId>lombok</artifactId>
+     <scope>compile</scope>
+ </dependency>
+```
+
+####  3.日志配置
+
+规范：项目开发不要编写`System.out.println()`,应该用**日志**记录信息
+
+![avater](images\log1.png)
+
+##### 1.简介
+
+1. Spring使用<font color=red>`commont-logging`</font>作为内部日志，但底层日志实现是开放的。可对接其他日志框架。
+1. 支持jul、log4j2、logback。SpringBoot提供了默认配置的控制台输出，也可以配置输出为文件。
+1. logback是默认使用的。
+1. 虽然**日志框架很多**，但是我们不用担心，使用SpringBoot的默认配置就能工作的很好。
+
+SpringBoot怎么吧日志默认配置好的：
+
+1. 每个`starter`场景，都会导入一个`spring-boot-starter`
+
+2. 核心场景引入了日志的所有功能`spring-boot-starter-logging`
+
+3. 默认使用了logback+slf4j组合作为底层日志
+
+   
+
+##### 2. 日志的格式
+
+- 默认输出格式：毫秒级精度
+- 日志级别：ERROR、WARN、INFO、DEBUG和TRACE
+- 进程ID
+- ---：消息分隔符
+- 线程名：使用[]包含
+- Logger名：通常是产生日志的类名
+- 消息：日志记录的内容
+
+注意：logback是没有FATAL级别，对应的是ERROR
+
+
+
+默认值：参照`spring-boot`包`additional-spring-configuration-metadata.json`文件
+
+默认输出格式：`%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}`
+
+可修改为：`%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread]%logger{15} ====> %msg%n`
+
+##### 3.日志级别
+
+- 由低到高：`ALL,TRACE,DEBUG,INFO,WARN,ERROR,OFF`
+- ALL:打印所有日志
+- TRACE:追踪框架详细流程日志。一般不使用
+- DEBUG:开发调试细节日志
+- WARN:警告但是不报错的信息日志，比如版本过时
+- ERROR: 业务错误日志，比如出现各种异常
+- FATAL:致命错误日志，比如jvm系统崩溃
+- OFF:关闭所有日志记录
+
+不指定级别的所有类，都是用root指定的级别作为默认级别
+
+SpringBoot日志默认级别是INFO
+
+
+
+##### 4. 日志分组
+
+logging.group.组名=xxx,xxx
+
+分组进行日志级别的统一设置，简化操作。
+
+```properties
+logging.group.abc=com.atguigu.logging.controller,com.atguigu.logging.controller2,com.atguigu.logging.controller3
+logging.level.abc=debug
+```
+
+
+
+##### 5.文件输出
+
+```properties
+#指定日志文件的路径.日志默认名叫 spring.log
+#logging.file.path=D:\\
+#指定日志文件的名
+#1. 只写名字。就生成到当前位置的demo.log
+#2. 写名字+路径
+logging.file.name=D:\\demo.log
+```
+
+
+
+##### 6.文档的归档与滚动切割
+
+归档：每天的日志单独存到一个文档中。
+
+切割：每个文件10MB，超过大小切割成另一个文件。
+
+```properties
+#归档、切割
+logging.logback.rollingpolicy.file-name-pattern=${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz
+logging.logback.rollingpolicy.max-file-size=10MB
+```
+
+
+
+##### 7. 自定义日志系统
+
+- 例：logback-spring.xml自定义详细配置放入resources文件夹，SpringBoot也会识别
+
+
+
+##### 8. 切换日志系统
+
+- 修改SpringBoot配置的日志实现类如`logback`改为`log4j`
+
+- ```xml
+  <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+  <!--                运用maven的从近原则，排除logback-->
+                  <exclusion>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-starter-logging</artifactId>
+                  </exclusion>
+              </exclusions>
+          </dependency>
+  <!--        引入log4j-->
+          <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-log4j2</artifactId>
+          </dependency>
+  ```
+
+
+
+##### 9. 最佳实战
+
+1. 导入任何第三方框架，先排除他的日志包，因为Boot底层	控制好了日志。
+2. 修改`application.properties` 配置文件，就可以调整日志的所有行为。如果不够，可以编写日志框架自己的配置文件在类路径下。比如`logback-spring.xml`，`log4j2-spring.xmnl`
+3. 如需对接**专业日志系统**，也只要把logback记录的日志灌到hafka之类的中间件，这个SpringBoot没关系，都是日志框架自己的配置，修改配置文件即可。
+4. **业务中使用slf4j-api记录日志，不要在sout了。**
